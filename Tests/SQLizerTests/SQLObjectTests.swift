@@ -38,6 +38,42 @@ final class SQLObjectsTests: XCTestCase {
             dump(movies)
         }
     }
+
+    func testDeleteMovie() async throws {
+        
+        let db = try await SQLDatabase.openInMemory { db in
+            try db.createTable(Movie.sqlTable)
+        }
+        
+        try await db.run { db in
+            XCTAssertEqual(try db.fetchSchemaVersion(), 1)
+        }
+        
+        let starWars = Movie(title: "Star Wars", releaseDate: Date(), duration: 123, rating: 5.0)
+        let theMatrix = Movie(title: "The Matrix", releaseDate: Date(), duration: 135, rating: 5.0)
+        
+        try await db.transaction { db in
+            try db.upsertObject(starWars)
+            try db.upsertObject(theMatrix)
+            return .commit
+        }
+        
+        try await db.run { db in
+            let movies = try db.fetchAllObjectsOfType(Movie.self)
+            XCTAssertEqual(movies.count, 2)
+        }
+        
+        try await db.transaction { db in
+            try db.deleteObject(starWars)
+            return .commit
+        }
+
+        try await db.run { db in
+            let movies = try db.fetchAllObjectsOfType(Movie.self)
+            dump(movies)
+            XCTAssertEqual(movies.count, 1)
+        }
+    }
 }
 
 @propertyWrapper

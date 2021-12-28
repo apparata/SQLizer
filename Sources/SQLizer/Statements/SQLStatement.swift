@@ -317,18 +317,18 @@ public class SQLStatement {
         }
     }
 
-    private func bind(namesAndValues: [String: SQLColumnCompatibleType?]) throws {
+    private func bind(namesAndValues: [String: SQLColumnCompatibleType?], optionalParameters: Bool = false) throws {
         let binder = Binder(id: id, db: db)
         for (name, value) in namesAndValues {
             do {
                 let sqlValue = value?.asSQLValue
                 switch sqlValue {
-                case .text(let string): try binder.bindText(string, to: name)
-                case .int(let number): try binder.bindInt(number, to: name)
-                case .double(let number): try binder.bindDouble(number, to: name)
-                case .blob(let data): try binder.bindBlob(data, to: name)
-                case .null: try binder.bindNull(to: name)
-                default: try binder.bindNull(to: name)
+                case .text(let string): try binder.bindText(string, to: name, isOptional: optionalParameters)
+                case .int(let number): try binder.bindInt(number, to: name, isOptional: optionalParameters)
+                case .double(let number): try binder.bindDouble(number, to: name, isOptional: optionalParameters)
+                case .blob(let data): try binder.bindBlob(data, to: name, isOptional: optionalParameters)
+                case .null: try binder.bindNull(to: name, isOptional: optionalParameters)
+                default: try binder.bindNull(to: name, isOptional: optionalParameters)
                 }
             } catch {
                 print("Failed to bind value '\(String(describing: value))' to '\(name)'")
@@ -339,7 +339,7 @@ public class SQLStatement {
     }
     
     private func bind<T: SQLRowRepresentable>(object: T) throws {
-        try bind(namesAndValues: object.makeSQLNamesAndValues())
+        try bind(namesAndValues: object.makeSQLNamesAndValues(), optionalParameters: true)
     }
 
     // MARK: - Step

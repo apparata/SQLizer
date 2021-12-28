@@ -65,6 +65,10 @@ public struct SQLError: Error {
     static func failedToBindValueToStatement(_ db: SQLDatabaseID) -> Self {
         return Self(.failedToPrepareStatement, db: db)
     }
+
+    static func failedToBindValueToStatementAsThereIsNoParameterNamed(_ name: String) -> Self {
+        return Self(.failedToPrepareStatement, message: "There is no matching parameter '\(name)'.")
+    }
     
     static func noValueForColumn(_ column: String) -> Self {
         return Self(.noValueForColumn, message: "There is no value for the column '\(column)'.")

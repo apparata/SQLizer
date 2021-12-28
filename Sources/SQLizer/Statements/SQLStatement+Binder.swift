@@ -52,26 +52,58 @@ internal extension SQLStatement {
 
         // MARK: - Named Parameters
         
-        func bindText(_ text: String, to parameterName: String) throws {
-            let index = try indexOfParameterNamed(parameterName)
+        func bindText(_ text: String, to parameterName: String, isOptional: Bool = false) throws {
+            let index: Int32
+            if isOptional {
+                guard let optionalIndex = indexOfOptionalParameterNamed(parameterName) else {
+                    return
+                }
+                index = optionalIndex
+            } else {
+                index = try indexOfParameterNamed(parameterName)
+            }
             try sqlite3_bind_text(id, index, text, -1, SQLITE_TRANSIENT)
                 .throwIfNotOK(.failedToBindValueToStatement, db)
         }
 
-        func bindInt(_ value: Int, to parameterName: String) throws {
-            let index = try indexOfParameterNamed(parameterName)
+        func bindInt(_ value: Int, to parameterName: String, isOptional: Bool = false) throws {
+            let index: Int32
+            if isOptional {
+                guard let optionalIndex = indexOfOptionalParameterNamed(parameterName) else {
+                    return
+                }
+                index = optionalIndex
+            } else {
+                index = try indexOfParameterNamed(parameterName)
+            }
             try sqlite3_bind_int64(id, index, Int64(value))
                 .throwIfNotOK(.failedToBindValueToStatement, db)
         }
         
-        func bindDouble(_ value: Double, to parameterName: String) throws {
-            let index = try indexOfParameterNamed(parameterName)
+        func bindDouble(_ value: Double, to parameterName: String, isOptional: Bool = false) throws {
+            let index: Int32
+            if isOptional {
+                guard let optionalIndex = indexOfOptionalParameterNamed(parameterName) else {
+                    return
+                }
+                index = optionalIndex
+            } else {
+                index = try indexOfParameterNamed(parameterName)
+            }
             try sqlite3_bind_double(id, index, value)
                 .throwIfNotOK(.failedToBindValueToStatement, db)
         }
         
-        func bindBlob(_ data: Data, to parameterName: String) throws {
-            let index = try indexOfParameterNamed(parameterName)
+        func bindBlob(_ data: Data, to parameterName: String, isOptional: Bool = false) throws {
+            let index: Int32
+            if isOptional {
+                guard let optionalIndex = indexOfOptionalParameterNamed(parameterName) else {
+                    return
+                }
+                index = optionalIndex
+            } else {
+                index = try indexOfParameterNamed(parameterName)
+            }
             _ = try data.withUnsafeBytes { (bytes) -> Bool in
                 try sqlite3_bind_blob(id, index, bytes.baseAddress, Int32(data.count), SQLITE_TRANSIENT)
                     .throwIfNotOK(.failedToBindValueToStatement, db)
@@ -79,8 +111,16 @@ internal extension SQLStatement {
             }
         }
         
-        func bindNull(to parameterName: String) throws {
-            let index = try indexOfParameterNamed(parameterName)
+        func bindNull(to parameterName: String, isOptional: Bool = false) throws {
+            let index: Int32
+            if isOptional {
+                guard let optionalIndex = indexOfOptionalParameterNamed(parameterName) else {
+                    return
+                }
+                index = optionalIndex
+            } else {
+                index = try indexOfParameterNamed(parameterName)
+            }
             try sqlite3_bind_null(id, index)
                 .throwIfNotOK(.failedToBindValueToStatement, db)
         }
@@ -90,7 +130,15 @@ internal extension SQLStatement {
         private func indexOfParameterNamed(_ name: String) throws -> Int32 {
             let index = sqlite3_bind_parameter_index(id, ":" + name)
             guard index > 0 else {
-                throw SQLError.failedToBindValueToStatement(db)
+                throw SQLError.failedToBindValueToStatementAsThereIsNoParameterNamed(name)
+            }
+            return index
+        }
+
+        private func indexOfOptionalParameterNamed(_ name: String) -> Int32? {
+            let index = sqlite3_bind_parameter_index(id, ":" + name)
+            guard index > 0 else {
+                return nil
             }
             return index
         }
