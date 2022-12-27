@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import AppKit
 
 public protocol SQLRowRepresentable {
     

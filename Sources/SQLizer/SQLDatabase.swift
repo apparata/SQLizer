@@ -35,7 +35,7 @@ public class SQLDatabase {
     
     deinit {
         sqlite3_update_hook(id, nil, nil)
-        sqlite3_close(id)
+        sqlite3_close_v2(id)
     }
     
     // MARK: - Open Database
