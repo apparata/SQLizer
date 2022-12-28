@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Fetch Row Sequence
     
     public func fetchRowSequence(using sql: SQL) throws -> SQLRowSequence {
-        try fetchRowSequence(using: prepareStatement(sql))
+        try fetchRowSequence(using: prepare(sql))
     }
 
     public func fetchRowSequence(using sql: SQL, values: SQLValue...) throws -> SQLRowSequence {
@@ -18,15 +18,15 @@ extension SQLDB {
     }
 
     public func fetchRowSequence(using sql: SQL, values: [SQLValue]) throws -> SQLRowSequence {
-        try fetchRowSequence(using: prepareStatement(sql), values: values)
+        try fetchRowSequence(using: prepare(sql), values: values)
     }
 
     public func fetchRowSequence(using sql: SQL, values: [SQLColumnCompatibleType?]) throws -> SQLRowSequence {
-        try fetchRowSequence(using: prepareStatement(sql), values: values)
+        try fetchRowSequence(using: prepare(sql), values: values)
     }
 
     public func fetchRowSequence(using sql: SQL, values: [String: SQLColumnCompatibleType?]) throws -> SQLRowSequence {
-        try fetchRowSequence(using: prepareStatement(sql), values: values)
+        try fetchRowSequence(using: prepare(sql), values: values)
     }
     
     // MARK: - Fetch Row Sequence Statement

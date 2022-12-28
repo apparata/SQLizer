@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Execute Object
     
     public func execute<T: SQLRowRepresentable>(_ sql: SQL, object: T) throws {
-        try execute(prepareStatement(sql), object: object)
+        try execute(prepare(sql), object: object)
     }
 
     // MARK: - Execute Object Statement

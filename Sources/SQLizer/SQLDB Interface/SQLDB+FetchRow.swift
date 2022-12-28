@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Fetch Row
     
     public func fetchRow(using sql: SQL) throws -> SQLRow? {
-        try fetchRow(using: prepareStatement(sql))
+        try fetchRow(using: prepare(sql))
     }
 
     public func fetchRow(using sql: SQL, values: SQLValue...) throws -> SQLRow? {
@@ -18,15 +18,15 @@ extension SQLDB {
     }
 
     public func fetchRow(using sql: SQL, values: [SQLValue]) throws -> SQLRow? {
-        try fetchRow(using: prepareStatement(sql), values: values)
+        try fetchRow(using: prepare(sql), values: values)
     }
 
     public func fetchRow(using sql: SQL, values: [SQLColumnCompatibleType?]) throws -> SQLRow? {
-        try fetchRow(using: prepareStatement(sql), values: values)
+        try fetchRow(using: prepare(sql), values: values)
     }
 
     public func fetchRow(using sql: SQL, values: [String: SQLColumnCompatibleType?]) throws -> SQLRow? {
-        try fetchRow(using: prepareStatement(sql), values: values)
+        try fetchRow(using: prepare(sql), values: values)
     }
     
     // MARK: - Fetch Row Statement

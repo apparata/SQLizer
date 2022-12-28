@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Fetch All Objects
 
     public func fetchAllObjects<T: SQLRowRepresentable>(as type: T.Type, using sql: SQL) throws -> [T] {
-        try fetchAllObjects(as: type, using: prepareStatement(sql))
+        try fetchAllObjects(as: type, using: prepare(sql))
     }
 
     public func fetchAllObjects<T: SQLRowRepresentable>(as type: T.Type, using sql: SQL, values: SQLValue...) throws -> [T] {
@@ -18,15 +18,15 @@ extension SQLDB {
     }
 
     public func fetchAllObjects<T: SQLRowRepresentable>(as type: T.Type, using sql: SQL, values: [SQLValue]) throws -> [T] {
-        try fetchAllObjects(as: type, using: prepareStatement(sql), values: values)
+        try fetchAllObjects(as: type, using: prepare(sql), values: values)
     }
 
     public func fetchAllObjects<T: SQLRowRepresentable>(as type: T.Type, using sql: SQL, values: [SQLColumnCompatibleType?]) throws -> [T] {
-        try fetchAllObjects(as: type, using: prepareStatement(sql), values: values)
+        try fetchAllObjects(as: type, using: prepare(sql), values: values)
     }
     
     public func fetchAllObjects<T: SQLRowRepresentable>(as type: T.Type, using sql: SQL, values: [String: SQLColumnCompatibleType?]) throws -> [T] {
-        try fetchAllObjects(as: type, using: prepareStatement(sql), values: values)
+        try fetchAllObjects(as: type, using: prepare(sql), values: values)
     }
     
     // MARK: - Fetch All Objects Statement

@@ -10,23 +10,23 @@ extension SQLDB {
     // MARK: - Execute
     
     public func execute(_ sql: SQL) throws {
-        try execute(prepareStatement(sql))
+        try execute(prepare(sql))
     }
 
     public func execute(_ sql: SQL, values: SQLValue...) throws {
-        try execute(prepareStatement(sql), values: values)
+        try execute(prepare(sql), values: values)
     }
 
     public func execute(_ sql: SQL, values: [SQLValue]) throws {
-        try execute(prepareStatement(sql), values: values)
+        try execute(prepare(sql), values: values)
     }
 
     public func execute(_ sql: SQL, values: [SQLColumnCompatibleType?]) throws {
-        try execute(prepareStatement(sql), values: values)
+        try execute(prepare(sql), values: values)
     }
 
     public func execute(_ sql: SQL, values: [String: SQLColumnCompatibleType?]) throws {
-        try execute(prepareStatement(sql), values: values)
+        try execute(prepare(sql), values: values)
     }
     
     // MARK: - Execute Statement

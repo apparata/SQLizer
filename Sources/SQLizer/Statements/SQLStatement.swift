@@ -35,6 +35,14 @@ public class SQLStatement {
         self.db = db
     }
     
+    deinit {
+        let status = sqlite3_finalize(id)
+        guard status == SQLITE_OK else {
+            logger.error(db)
+            return
+        }
+    }
+    
     // MARK: - Execute
     
     internal func execute() throws {

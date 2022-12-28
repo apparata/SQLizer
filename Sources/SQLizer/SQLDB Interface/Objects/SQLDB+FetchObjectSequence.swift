@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Fetch Object Sequence
     
     public func fetchObjectSequence<T: SQLRowRepresentable>(type: T.Type, using sql: SQL) throws -> SQLObjectSequence<T> {
-        try fetchObjectSequence(type: type, using: prepareStatement(sql))
+        try fetchObjectSequence(type: type, using: prepare(sql))
     }
 
     public func fetchObjectSequence<T: SQLRowRepresentable>(type: T.Type, using sql: SQL, values: SQLValue...) throws -> SQLObjectSequence<T> {
@@ -18,15 +18,15 @@ extension SQLDB {
     }
 
     public func fetchObjectSequence<T: SQLRowRepresentable>(type: T.Type, using sql: SQL, values: [SQLValue]) throws -> SQLObjectSequence<T> {
-        try fetchObjectSequence(type: type, using: prepareStatement(sql), values: values)
+        try fetchObjectSequence(type: type, using: prepare(sql), values: values)
     }
 
     public func fetchObjectSequence<T: SQLRowRepresentable>(type: T.Type, using sql: SQL, values: [SQLColumnCompatibleType?]) throws -> SQLObjectSequence<T> {
-        try fetchObjectSequence(type: type, using: prepareStatement(sql), values: values)
+        try fetchObjectSequence(type: type, using: prepare(sql), values: values)
     }
 
     public func fetchObjectSequence<T: SQLRowRepresentable>(type: T.Type, using sql: SQL, values: [String: SQLColumnCompatibleType?]) throws -> SQLObjectSequence<T> {
-        try fetchObjectSequence(type: type, using: prepareStatement(sql), values: values)
+        try fetchObjectSequence(type: type, using: prepare(sql), values: values)
     }
     
     // MARK: - Fetch Object Sequence Statement

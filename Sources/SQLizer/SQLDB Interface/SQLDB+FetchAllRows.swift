@@ -10,7 +10,7 @@ extension SQLDB {
     // MARK: - Fetch All Rows
 
     public func fetchAllRows(using sql: SQL) throws -> [SQLRow] {
-        try fetchAllRows(using: prepareStatement(sql))
+        try fetchAllRows(using: prepare(sql))
     }
 
     public func fetchAllRows(using sql: SQL, values: SQLValue...) throws -> [SQLRow] {
@@ -18,15 +18,15 @@ extension SQLDB {
     }
 
     public func fetchAllRows(using sql: SQL, values: [SQLValue]) throws -> [SQLRow] {
-        try fetchAllRows(using: prepareStatement(sql), values: values)
+        try fetchAllRows(using: prepare(sql), values: values)
     }
 
     public func fetchAllRows(using sql: SQL, values: [SQLColumnCompatibleType?]) throws -> [SQLRow] {
-        try fetchAllRows(using: prepareStatement(sql), values: values)
+        try fetchAllRows(using: prepare(sql), values: values)
     }
 
     public func fetchAllRows(using sql: SQL, values: [String: SQLColumnCompatibleType?]) throws -> [SQLRow] {
-        try fetchAllRows(using: prepareStatement(sql), values: values)
+        try fetchAllRows(using: prepare(sql), values: values)
     }
     
     // MARK: - Fetch All Rows Statement

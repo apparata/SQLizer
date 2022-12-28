@@ -5,31 +5,42 @@
 import Foundation
 import libsqlite3
 
+public typealias SQLOnUpdate = (SQLUpdateType, _ table: String?, _ rowID: Int64) -> Void
+
 internal typealias SQLDatabaseID = OpaquePointer
 
 @SQLActor
 public class SQLDatabase {
     
+    /// Specifies whether migration or creation of the database should be performed.
     public enum MigrationType {
+    /// This database is being created from scratch with the specified schema version.
     case create(version: Int)
+    
+    /// This database is being upgraded from `fromVersion` to `toVersion`.
     case upgrade(fromVersion: Int, toVersion: Int)
     }
-    
-    private let id: SQLDatabaseID
     
     /// The version of the schema meant to be used in this database.
     public let schemaVersion: Int
     
+    /// Called whenever an entry in the table is updated.
+    public var onUpdate: SQLOnUpdate? {
+        set { setUpdateHook(newValue) }
+        get { updateHook?.hook }
+    }
+    
     private let statementManager: SQLStatementManager
     
-    private let statements: Statements
+    private var updateHook: SQLUpdateHook?
+
+    private let id: SQLDatabaseID
     
     private init(id: SQLDatabaseID, schemaVersion: Int, migration: @SQLActor (_ db: SQLDB, _ type: MigrationType) throws -> Void) throws {
         precondition(schemaVersion > 0)
         self.id = id
         self.schemaVersion = schemaVersion
         statementManager = SQLStatementManager(db: id)
-        statements = try Statements(statementManager, schemaVersion: schemaVersion)
         try migrateIfNecessary(migration)
     }
     
@@ -56,12 +67,16 @@ public class SQLDatabase {
         return try SQLDatabase(id: db, schemaVersion: schemaVersion, migration: migration)
     }
 
+    // MARK: - Open Database in Memory
+    
     /// Create a new database in memory, which is deallocated when SQLDatabase object is released.
     public static func openInMemory(creation: @SQLActor (_ db: SQLDB) throws -> Void) throws -> SQLDatabase {
         try open(at: ":memory:", schemaVersion: 1) { db, type in
             try creation(db)
         }
     }
+    
+    // MARK: - Open Temporary Database
 
     /// Create a new temporary database file, which is deleted when SQLDatabase object is released.
     ///
@@ -89,16 +104,18 @@ public class SQLDatabase {
     @discardableResult
     public func transaction(_ operations: @SQLActor (SQLDB) throws -> SQLTransactionResult) throws -> SQLTransactionResult {
         do {
-            try statements.beginTransaction.execute()
+            try statementManager.prepare(.Internal.beginTransaction).execute()
             let db = SQLDB(statementManager: statementManager)
             let result = try operations(db)
             switch result {
-            case .commit: try statements.commitTransaction.execute()
-            case .rollback: try statements.rollbackTransaction.execute()
+            case .commit:
+                try statementManager.prepare(.Internal.commitTransaction).execute()
+            case .rollback:
+                try statementManager.prepare(.Internal.rollbackTransaction).execute()
             }
             return result
         } catch {
-            try statements.rollbackTransaction.execute()
+            try statementManager.prepare(.Internal.rollbackTransaction).execute()
             throw error
         }
     }
@@ -106,7 +123,13 @@ public class SQLDatabase {
     // MARK: - Compact the database
     
     public func compact() throws {
-        try statements.vacuum.execute()
+        try statementManager.prepare(.Internal.vacuum).execute()
+    }
+    
+    // MARK: - Backup database to file
+    
+    public func backup(to filePath: String) throws {
+        try statementManager.prepare(.Internal.vacuumInto).execute(values: [.text(filePath)])
     }
     
     // MARK: - Check Schema Version
@@ -125,7 +148,7 @@ public class SQLDatabase {
                 } else {
                     try migration(db, .upgrade(fromVersion: version, toVersion: self.schemaVersion))
                 }
-                try self.statements.updateSchemaVersion.execute()
+                try statementManager.prepare(.Internal.updateSchemaVersion(self.schemaVersion)).execute()
                 return .commit
             }
         }
@@ -134,12 +157,51 @@ public class SQLDatabase {
     // MARK: - Fetch Schema Version
     
     private func fetchSchemaVersion() throws -> Int {
-        guard let row = try statements.fetchSchemaVersion.fetchRow() else {
+        guard let row = try statementManager.prepare(.Internal.fetchSchemaVersion).fetchRow() else {
             return 0
         }
         guard let version = try row.value(at: 0, as: Int.self) else {
             return 0
         }
         return version
+    }
+    
+    // MARK: - Set Update Hook
+    
+    private func setUpdateHook(_ hook: (SQLOnUpdate)?) -> Void {
+        if let hook = hook {
+            let updateHook = SQLUpdateHook(hook)
+            self.updateHook = updateHook
+            sqlite3_update_hook(id, { (rawHook: UnsafeMutableRawPointer?, updateType, _, table, rowID) in
+                guard let rawHook = rawHook else {
+                    return
+                }
+                let updateHook = Unmanaged<SQLUpdateHook>.fromOpaque(rawHook).takeUnretainedValue()
+                let type: SQLUpdateType
+                switch updateType {
+                case SQLITE_INSERT: type = .insert
+                case SQLITE_UPDATE: type = .update
+                case SQLITE_DELETE: type = .delete
+                default: return
+                }
+                updateHook.call(type, table.map { String(cString: $0) }, rowID)
+            }, Unmanaged<SQLUpdateHook>.passUnretained(updateHook).toOpaque())
+        } else {
+            sqlite3_update_hook(id, nil, nil)
+        }
+    }
+}
+
+// MARK: - Update Hook
+
+private class SQLUpdateHook {
+    let hook: (SQLUpdateType, _ table: String?, _ rowID: Int64) -> Void
+    
+    init(_ hook: @escaping (SQLUpdateType, _ table: String?, _ rowID: Int64) -> Void) {
+        self.hook = hook
+    }
+    
+    func call(_ type: SQLUpdateType, _ table: String?, _ rowID: Int64) {
+        hook(type, table, rowID)
     }
 }

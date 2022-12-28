@@ -7,9 +7,7 @@ import libsqlite3
 
 @SQLActor
 internal class SQLStatementManager {
-    
-    private var statements: [SQL: SQLStatementID] = [:]
-    
+        
     private let db: SQLDatabaseID
     
     private var errorMessage: String {
@@ -19,23 +17,9 @@ internal class SQLStatementManager {
     internal init(db: SQLDatabaseID) {
         self.db = db
     }
-    
-    deinit {
-        for statementID in statements.values {
-            let status = sqlite3_finalize(statementID)
-            guard status == SQLITE_OK else {
-                logger.error(db)
-                continue
-            }
-        }
-    }
-    
-    func prepareStatement(_ sql: SQL) throws -> SQLStatement {
         
-        if let statementID = statements[sql] {
-            return SQLStatement(id: statementID, db: db)
-        }
-        
+    func prepare(_ sql: SQL) throws -> SQLStatement {
+                
         var prepareID: SQLStatementID?
         try sqlite3_prepare_v2(db, sql.string, -1, &prepareID, nil)
             .throwIfNotOK(.failedToPrepareStatement, db)
@@ -48,7 +32,7 @@ internal class SQLStatementManager {
     }
     
     /// Do not use this directly unless absolutely necessary.
-    func prepareUncheckedStatement(_ sql: String) throws -> SQLStatement {
+    func prepareUnchecked(_ sql: String) throws -> SQLStatement {
 
         var prepareID: SQLStatementID?
         try sqlite3_prepare_v2(db, sql, -1, &prepareID, nil)
@@ -59,6 +43,5 @@ internal class SQLStatementManager {
         }
 
         return SQLStatement(id: statementID, db: db)
-
     }
 }
