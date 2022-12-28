@@ -6,7 +6,7 @@ import Foundation
 import os
 import libsqlite3
 
-let logger = Logger(subsystem: "io.apparata.sqlitekit", category: "Database")
+let logger = Logger(subsystem: "io.apparata.sqlizer", category: "Database")
 
 extension Logger {
     
