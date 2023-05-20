@@ -1,7 +1,3 @@
-//
-//  Copyright © 2021 Apparata AB. All rights reserved.
-//
-
 import Foundation
 import libsqlite3
 
@@ -14,6 +10,7 @@ public class SQLDatabase {
     
     /// Specifies whether migration or creation of the database should be performed.
     public enum MigrationType {
+        
     /// This database is being created from scratch with the specified schema version.
     case create(version: Int)
     

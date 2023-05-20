@@ -1,7 +1,3 @@
-//
-//  Copyright © 2021 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 /// Represents a textual description of an SQL statement.

@@ -1,7 +1,3 @@
-//
-//  Copyright © 2020 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 func replacing<T, U>(_ keyPath: WritableKeyPath<T, U>, on object: T, with value: U) -> T {

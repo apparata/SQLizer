@@ -1,7 +1,3 @@
-//
-//  Copyright © 2019 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 /// The SQLDB is the context the client of SQLizer will have access to for performing queries.

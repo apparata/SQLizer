@@ -1,7 +1,3 @@
-//
-//  Copyright © 2021 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 @resultBuilder
@@ -73,15 +69,7 @@ public struct SQLBuilder {
     public static func buildArray(_ components: [[String]]) -> [String] {
         return components.flatMap { $0 }
     }
-
-    public static func buildFinalResult(_ component: [String]) -> [String] {
-        return component
-    }
     
-    public static func buildFinalResult(_ component: [String]) -> String {
-        return component.joined(separator: " ")
-    }
-
     public static func buildFinalResult(_ component: [String]) -> SQL {
         return SQL(component.joined(separator: " "))
     }

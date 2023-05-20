@@ -1,7 +1,3 @@
-//
-//  Copyright © 2021 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 extension SQL {
@@ -32,11 +28,8 @@ extension SQL {
             }
         }
         
-        @SQLBuilder
-        func makeColumns(_ table: SQLTable) -> [String] {
-            for column in table.columns {
-                makeColumn(column)
-            }
+        func makeColumns(_ table: SQLTable) -> String {
+            table.columns.map { makeColumn($0).string }.joined(separator: ",\n ")
         }
         
         return makeSQL {
@@ -53,7 +46,7 @@ extension SQL {
                 "AS \(selectStatement)"
             } else {
                 "(\n"
-                makeColumns(table).joined(separator: ",\n ")
+                makeColumns(table)
                 if let primaryKey = table.constraints.primaryKey {
                     ", \n"
                     "PRIMARY KEY ("

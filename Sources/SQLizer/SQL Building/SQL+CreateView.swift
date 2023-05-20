@@ -1,7 +1,3 @@
-//
-//  Copyright © 2021 Apparata AB. All rights reserved.
-//
-
 import Foundation
 
 extension SQL {
@@ -9,7 +5,7 @@ extension SQL {
     public static func createView(_ view: SQLView, options: SQLCreateViewOptions = []) -> SQL {
         
         @SQLBuilder
-        func makeColumn(_ column: SQLTableColumn) -> String {
+        func makeColumn(_ column: SQLTableColumn) -> SQL {
             column
             column.dataType
             if column.notNullable {
@@ -32,11 +28,8 @@ extension SQL {
             }
         }
         
-        @SQLBuilder
-        func makeColumns(_ view: SQLView) -> [String] {
-            for column in view.columns {
-                makeColumn(column)
-            }
+        func makeColumns(_ view: SQLView) -> String {
+            view.columns.map { makeColumn($0).string }.joined(separator: ",\n ")
         }
         
         return makeSQL {
@@ -51,7 +44,7 @@ extension SQL {
             }
             if view.columns.count > 0 {
                 "(\n"
-                makeColumns(view).joined(separator: ",\n ")
+                makeColumns(view)
                 "\n)"
             }
             "AS \(view.selectStatement)"
