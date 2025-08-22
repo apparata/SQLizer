@@ -4,4 +4,4 @@ SQLizer is a simple Swift wrapper for SQLite.
 
 # License
 
-SQLizer is public domain. See UNLICENSE file for details.
+SQLizer is released under the Zero-Clause BSD license. See LICENSE file for details.
